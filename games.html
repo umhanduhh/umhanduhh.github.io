@@ -1,31 +1,32 @@
-<<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Amateur Chefs Arcade</title>
+    <title>Games</title>
     <style>
         body {
             font-family: "GillSans", sans-serif;
             margin: 0;
             padding: 0;
             background-color: #0f4c81;
-            height: 100vh;
             display: flex;
             flex-direction: column;
+            align-items: center;
         }
         header {
             background-color: #BFD0CA;
             color: #0f4c81;
-            padding: 15px;
+            padding: 12px;
             text-align: center;
-            flex-shrink: 0;
+            width: 100%;
         }
         nav {
             display: flex;
             justify-content: center;
             background-color: #a5b2b5;
-            flex-shrink: 0;
+            align-items: self-start;
+            width: 100%;
         }
         nav a {
             color: white;
@@ -38,23 +39,68 @@
             color: #e9b666;
         }
         main {
-            padding: 20px;
+            display: flex;
+            flex-direction: row;
+            gap: 20px;
+            flex-wrap: wrap;
+            width: 80%;
+            padding: 10px;
             color: #BFD0CA;
-            flex-grow: 1;
-            overflow-y: auto;
         }
+        #plate {
+            border: 2px solid #a5b2b5;
+            background-color: #a5b2b5;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            align-self: center;
+            position: relative;
+        }
+        #protein-counter {
+            width: 100%;
+            color:#a5b2b5;
+            text-align: center;
+            font-size: 40px;
+            margin-top: 20px;}
+
+            
+        #food-items {
+            display: flex;
+            flex-wrap: wrap;
+            width: calc(100% - 350px);
+        }
+        .food-item {
+            margin: 10px;
+            width: 80px;
+            height: 80px;
+            cursor: grab;
+            box-sizing: border-box;
+        }
+        .food-item img {
+            width: 80px;
+            height: 80px;
+            border: 2px solid #0f4c81;
+        }
+        .on-plate {
+            position: absolute;
+            img {
+                width: 80px;
+                height: 80px;
+            }
+        }
+
         footer {
             background-color: #edcabe;
             color: white;
             text-align: center;
             padding: 10px;
-            flex-shrink: 0;
+            width: 100%;
         }
     </style>
 </head>
 <body>
     <header>
-        <h1>Amateur Chefs Arcade</h1>
+        <h1>Games</h1>
     </header>
     <nav>
         <a href="./index.html">Home</a>
@@ -63,3 +109,137 @@
         <a href="./recipes.html">Recipes</a>
         <a href="./blog.html">Blog</a>
     </nav>
+    <main>
+        <h2>Start Your Day Strong</h2> 
+        <p>It's often recommended that adults have .36 grams of protein per pound of their body weight. <br> The amount of protein a person needs can vary, and you should work with a registered dietitian if you want to learn more about your specific protein needs. <br> Most people can benefit from having a breakfast that's high in protein. <br> Can you drag and drop foods to the plate to build a breakfast of 30g of protein or more? </p>
+        <div id="plate-container">
+            <div id="plate"></div>
+            <div id="protein-counter">
+                Total Protein: <span id="total-protein">0</span>g
+            </div>
+        </div>
+        <div id="food-items"></div>
+    </main>
+   
+    <footer>
+        <p>&copy; 2024 Protein Plate Game</p>
+    </footer>
+    <script>
+        const foodItems = [
+            { name: "Avocado", protein: 3, img: "./images/avocado.png" },
+            { name: "Eggs", protein: 18, img: "./images/eggs.png" },
+            { name: "Almonds", protein: 6, img: "./images/almonds.png" },
+            { name: "Bacon", protein: 9, img: "./images/bacon.png" },
+            { name: "Bagel", protein: 9, img: "./images/bagel.png" },
+            { name: "Banana", protein: 1, img: "./images/banana.png" },
+            { name: "Biscuits and Gravy", protein: 7, img: "./images/biscuits and gravy.png" },
+            { name: "Sausage Links", protein: 15, img: "./images/sausages.png" },
+            { name: "Cereal", protein: 4, img: "./images/cereal.png" },
+            { name: "Cinnamon Rolls", protein: 3, img: "./images/cinnamon roll.png" },
+            { name: "Cottage Cheese", protein: 25, img: "./images/cottage cheese.png" },
+            { name: "Croissant", protein: 5, img: "./images/croissant.png" },
+            { name: "Donut", protein: 2, img: "./images/donut.png" },
+            { name: "English Muffin", protein: 5, img: "./images/english muffin.png" },
+            { name: "French Toast", protein: 8, img: "./images/french toast.png" },
+            { name: "Fruit Smoothie", protein: 3, img: "./images/fruit smoothie.png" },
+            { name: "Granola", protein: 5, img: "./images/granola.png" },
+            { name: "Greek Yogurt", protein: 10, img: "./images/greek yogurt.png" },
+            { name: "Hashbrowns", protein: 2, img: "./images/hashbrowns.png" },
+            { name: "Mixed Fruit", protein: 1, img: "./images/fruit.png" },
+            { name: "Muffins", protein: 3, img: "./images/muffin.png" },
+            { name: "Oatmeal", protein: 6, img: "./images/oatmeal.png" },
+            { name: "Pancakes", protein: 6, img: "./images/pancakes.png" },
+            { name: "Peanut Butter", protein: 8, img: "./images/peanut buter.png" },
+            { name: "Protein Shake", protein: 20, img: "./images/protein shake.png" },
+            { name: "Quiche", protein: 15, img: "./images/quiche.png" },
+            { name: "Scones", protein: 3, img: "./images/scones.png" },
+            { name: "Waffles", protein: 5, img: "./images/waffle.png" },
+            { name: "Whole Wheat Toast", protein: 6, img: "./images/toast.png" },
+            { name: "Breakfast Sandwich", protein: 12, img: "./images/breakfast sandwich.png" },
+        ];
+
+        const foodItemsContainer = document.getElementById('food-items');
+        const plate = document.getElementById('plate');
+        const totalProteinEl = document.getElementById('total-protein');
+        let totalProtein = 0;
+
+        foodItems.forEach(item => {
+            const foodDiv = document.createElement('div');
+            foodDiv.classList.add('food-item');
+            foodDiv.draggable = true;
+            foodDiv.dataset.protein = item.protein;
+
+            const foodImg = document.createElement('img');
+            foodImg.classList.add('food-item-img')
+            foodImg.dataset.protein = item.protein;
+            foodImg.src = item.img;
+            foodImg.alt = item.name;
+
+            foodDiv.appendChild(foodImg);
+            foodItemsContainer.appendChild(foodDiv);
+        });
+
+        document.addEventListener('dragstart', event => {
+            if (event.target.classList.contains('food-item-img')) {
+                event.dataTransfer.setData('text/plain', event.target.dataset.protein);
+            }
+        });
+
+        plate.addEventListener('dragover', event => {
+            event.preventDefault();
+        });
+
+        plate.addEventListener('drop', event => {
+            event.preventDefault();
+            const protein = parseInt(event.dataTransfer.getData('text/plain'), 10);
+            console.log(`protein on drag`, protein)
+            const foodHtml = event.dataTransfer.getData('text/html');
+            const offsetX = event.dataTransfer.getData('offsetX');
+            const offsetY = event.dataTransfer.getData('offsetY');
+
+            totalProtein += protein;
+            console.log(`protein`, protein)
+            console.log(`totalProtein`, totalProtein)
+            totalProteinEl.textContent = totalProtein;
+
+            const foodDiv = document.createElement('div');
+            foodDiv.classList.add('on-plate');
+            foodDiv.innerHTML = foodHtml;
+
+            const x = event.clientX - plate.getBoundingClientRect().left - offsetX;
+            const y = event.clientY - plate.getBoundingClientRect().top - offsetY;
+            console.log(`x, y`, x, y)
+
+            const radius = plate.clientWidth / 2;
+            const centerX = radius;
+            const centerY = radius;
+            const dx = x + offsetX - centerX;
+            const dy = y + offsetY - centerY;
+            if (Math.sqrt(dx * dx + dy * dy) + Math.max(offsetX, offsetY) > radius) {
+                return; 
+            }
+
+            foodDiv.style.left = `${x}px`;
+            foodDiv.style.top = `${y}px`;
+
+            plate.appendChild(foodDiv);
+
+            if (totalProtein >= 30) {
+                alert('Congratulations! You reached 30g of protein.');
+            }
+            //else if (totalProtein < 30) {
+            //     alert("Not quite there yet, add some more food to get to 30g of protein.");
+            //     //resetGame();
+            // }
+        });
+
+        function resetGame() {
+            totalProtein = 0;
+            totalProteinEl.textContent = totalProtein;
+            while (plate.firstChild) {
+                plate.removeChild(plate.firstChild);
+            }
+        }
+    </script>
+</body>
+</html>
