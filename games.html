@@ -7,8 +7,8 @@
     <style>
         body {
             font-family: "GillSans", sans-serif;
-            margin: 0;
-            padding: 0;
+            margin: 5px;
+            padding: 5px;
             background-color: #0f4c81;
             display: flex;
             flex-direction: column;
@@ -17,7 +17,8 @@
         header {
             background-color: #BFD0CA;
             color: #0f4c81;
-            padding: 12px;
+            padding: 4px;
+            font-size: 20px;
             text-align: center;
             width: 100%;
         }
@@ -25,18 +26,20 @@
             display: flex;
             justify-content: center;
             background-color: #a5b2b5;
-            align-items: self-start;
             width: 100%;
         }
         nav a {
             color: white;
-            padding: 14px 20px;
+            padding: 14px 80px;
             text-decoration: none;
+            font-size: 20px;
+            
             text-align: center;
         }
         nav a:hover {
             background-color: #BFD0CA;
             color: #e9b666;
+            font-style: bold;
         }
         main {
             display: flex;
@@ -60,7 +63,9 @@
             width: 100%;
             color:#a5b2b5;
             text-align: center;
-            font-size: 40px;
+            font: "GillSans", sans-serif
+            font-style: bold;
+            font-size: 30px;
             margin-top: 20px;}
 
             
@@ -71,14 +76,14 @@
         }
         .food-item {
             margin: 10px;
-            width: 80px;
-            height: 80px;
+            width: 75px;
+            height: 75px;
             cursor: grab;
             box-sizing: border-box;
         }
         .food-item img {
-            width: 80px;
-            height: 80px;
+            width: 75px;
+            height: 75px;
             border: 2px solid #0f4c81;
         }
         .on-plate {
@@ -88,13 +93,12 @@
                 height: 80px;
             }
         }
-
         footer {
             background-color: #edcabe;
             color: white;
-            text-align: center;
+            text-align: stretch;
             padding: 10px;
-            width: 100%;
+        }
         }
     </style>
 </head>
@@ -110,7 +114,7 @@
         <a href="./blog.html">Blog</a>
     </nav>
     <main>
-        <h2>Start Your Day Strong</h2> 
+        <h1>Start Your Day Strong</h1> 
         <p>It's often recommended that adults have .36 grams of protein per pound of their body weight. <br> The amount of protein a person needs can vary, and you should work with a registered dietitian if you want to learn more about your specific protein needs. <br> Most people can benefit from having a breakfast that's high in protein. <br> Can you drag and drop foods to the plate to build a breakfast of 30g of protein or more? </p>
         <div id="plate-container">
             <div id="plate"></div>
@@ -122,7 +126,7 @@
     </main>
    
     <footer>
-        <p>&copy; 2024 Protein Plate Game</p>
+        <p>&copy; 2024 Amateur Chefs Arcade</p>
     </footer>
     <script>
         const foodItems = [
