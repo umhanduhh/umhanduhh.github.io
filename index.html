@@ -133,6 +133,132 @@
             padding: 10px;
             flex-shrink: 0;
         }
+
+        /* ── Fiber Game ── */
+        #fiber-game {
+            margin-top: 60px;
+            padding-top: 40px;
+            border-top: 2px solid #a5b2b5;
+        }
+        #fiber-game h2 {
+            margin-top: 0;
+        }
+        #fiber-flashcard {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 14px;
+        }
+        #fiber-card {
+            background-color: #BFD0CA;
+            color: #0f4c81;
+            border-radius: 12px;
+            padding: 32px 28px;
+            width: 300px;
+            text-align: center;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+        }
+        #fiber-card-img {
+            width: 130px;
+            height: 130px;
+            background-color: #a5b2b5;
+            border-radius: 8px;
+            margin: 0 auto 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            font-size: 12px;
+            color: #0f4c81;
+        }
+        #fiber-card-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        #fiber-card-food-name {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        #fiber-card-serving {
+            font-size: 13px;
+            color: #4a6580;
+            margin-bottom: 22px;
+        }
+        #fiber-guess-area {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            align-items: center;
+        }
+        #fiber-input {
+            width: 72px;
+            padding: 8px;
+            font-size: 18px;
+            text-align: center;
+            border: 2px solid #a5b2b5;
+            border-radius: 4px;
+            font-family: "GillSans", sans-serif;
+            color: #0f4c81;
+        }
+        #fiber-input:focus {
+            outline: none;
+            border-color: #0f4c81;
+        }
+        #fiber-check-btn, #fiber-next-btn, #fiber-restart-btn {
+            background-color: #0f4c81;
+            color: white;
+            border: none;
+            padding: 8px 18px;
+            font-size: 16px;
+            font-family: "GillSans", sans-serif;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        #fiber-check-btn:hover, #fiber-next-btn:hover, #fiber-restart-btn:hover {
+            background-color: #a5b2b5;
+        }
+        #fiber-result {
+            margin-top: 18px;
+            font-size: 17px;
+            padding: 10px 14px;
+            border-radius: 6px;
+        }
+        #fiber-result.correct {
+            background-color: #4a8c5c;
+            color: white;
+        }
+        #fiber-result.close {
+            background-color: #e9b666;
+            color: #0f4c81;
+        }
+        #fiber-result.incorrect {
+            background-color: #b85450;
+            color: white;
+        }
+        #fiber-next-btn {
+            margin-top: 14px;
+        }
+        #fiber-progress {
+            color: #BFD0CA;
+            font-size: 15px;
+        }
+        #fiber-score-display {
+            color: #BFD0CA;
+            font-size: 17px;
+        }
+        #fiber-complete {
+            text-align: center;
+            color: #BFD0CA;
+        }
+        #fiber-complete h3 {
+            font-size: 26px;
+            margin-bottom: 8px;
+        }
+        #fiber-restart-btn {
+            margin-top: 16px;
+        }
     </style>
 </head>
 <body>
@@ -153,6 +279,31 @@
             <div id="food-items"></div>
         </div>
         <div id="success-banner" hidden>Congratulations! You reached 30g of protein!</div>
+
+        <section id="fiber-game">
+            <h2>Fiber Finder</h2>
+            <p>How well do you know your fiber? Guess how many grams of fiber are in each food, then check your answer.</p>
+            <div id="fiber-flashcard">
+                <div id="fiber-card">
+                    <div id="fiber-card-img">image coming soon</div>
+                    <div id="fiber-card-food-name"></div>
+                    <div id="fiber-card-serving"></div>
+                    <div id="fiber-guess-area">
+                        <input type="number" id="fiber-input" placeholder="g" step="0.1" min="0">
+                        <button id="fiber-check-btn">Check</button>
+                    </div>
+                    <div id="fiber-result" hidden></div>
+                    <button id="fiber-next-btn" hidden>Next →</button>
+                </div>
+                <div id="fiber-progress"></div>
+                <div id="fiber-score-display">Score: <span id="fiber-score-val">0</span></div>
+            </div>
+            <div id="fiber-complete" hidden>
+                <h3>All done!</h3>
+                <p>You scored <span id="fiber-final-score"></span> out of 30.</p>
+                <button id="fiber-restart-btn">Play Again</button>
+            </div>
+        </section>
     </main>
     <footer>
         <p>&copy; 2024 Amateur Chefs Arcade</p>
@@ -291,6 +442,139 @@
             plate.innerHTML = '';
             successBanner.hidden = true;
         });
+
+        // ── Fiber Game ──
+        const fiberFoods = [
+            { name: "Split Peas",       serving: "1 cup cooked",       fiber: 16,   img: "./images/fiber/split-peas.png" },
+            { name: "Lentils",          serving: "1 cup cooked",       fiber: 15.6, img: "./images/fiber/lentils.png" },
+            { name: "Black Beans",      serving: "1 cup cooked",       fiber: 15,   img: "./images/fiber/black-beans.png" },
+            { name: "Chickpeas",        serving: "1 cup cooked",       fiber: 12.5, img: "./images/fiber/chickpeas.png" },
+            { name: "Kidney Beans",     serving: "1 cup cooked",       fiber: 11.3, img: "./images/fiber/kidney-beans.png" },
+            { name: "Flaxseeds",        serving: "2 tbsp",             fiber: 5.6,  img: "./images/fiber/flaxseeds.png" },
+            { name: "Chia Seeds",       serving: "2 tbsp",             fiber: 8.3,  img: "./images/fiber/chia-seeds.png" },
+            { name: "Almonds",          serving: "1 oz (~23 nuts)",    fiber: 3.5,  img: "./images/fiber/almonds.png" },
+            { name: "Pistachios",       serving: "1 oz (~49 nuts)",    fiber: 2.9,  img: "./images/fiber/pistachios.png" },
+            { name: "Pecans",           serving: "1 oz",               fiber: 2.7,  img: "./images/fiber/pecans.png" },
+            { name: "Walnuts",          serving: "1 oz",               fiber: 1.9,  img: "./images/fiber/walnuts.png" },
+            { name: "Cashews",          serving: "1 oz",               fiber: 0.9,  img: "./images/fiber/cashews.png" },
+            { name: "Sunflower Seeds",  serving: "1 oz",               fiber: 2.4,  img: "./images/fiber/sunflower-seeds.png" },
+            { name: "Oats",             serving: "1/2 cup dry",        fiber: 4,    img: "./images/fiber/oats.png" },
+            { name: "Barley",           serving: "1 cup cooked",       fiber: 6,    img: "./images/fiber/barley.png" },
+            { name: "Quinoa",           serving: "1 cup cooked",       fiber: 5.2,  img: "./images/fiber/quinoa.png" },
+            { name: "Brown Rice",       serving: "1 cup cooked",       fiber: 3.5,  img: "./images/fiber/brown-rice.png" },
+            { name: "Artichoke",        serving: "1 medium, cooked",   fiber: 10.3, img: "./images/fiber/artichoke.png" },
+            { name: "Broccoli",         serving: "1 cup cooked",       fiber: 5.1,  img: "./images/fiber/broccoli.png" },
+            { name: "Brussels Sprouts", serving: "1 cup cooked",       fiber: 4.1,  img: "./images/fiber/brussels-sprouts.png" },
+            { name: "Sweet Potato",     serving: "1 medium, baked",    fiber: 3.8,  img: "./images/fiber/sweet-potato.png" },
+            { name: "Carrots",          serving: "1 cup raw",          fiber: 3.6,  img: "./images/fiber/carrots.png" },
+            { name: "Kale",             serving: "1 cup cooked",       fiber: 2.6,  img: "./images/fiber/kale.png" },
+            { name: "Edamame",          serving: "1 cup cooked",       fiber: 8,    img: "./images/fiber/edamame.png" },
+            { name: "Avocado",          serving: "1/2 fruit",          fiber: 5,    img: "./images/fiber/avocado.png" },
+            { name: "Pear",             serving: "1 medium",           fiber: 5.5,  img: "./images/fiber/pear.png" },
+            { name: "Raspberries",      serving: "1 cup",              fiber: 8,    img: "./images/fiber/raspberries.png" },
+            { name: "Apple",            serving: "1 medium, with skin",fiber: 4.4,  img: "./images/fiber/apple.png" },
+            { name: "Guava",            serving: "1 cup",              fiber: 8.9,  img: "./images/fiber/guava.png" },
+            { name: "Passion Fruit",    serving: "1/2 cup pulp",       fiber: 12.2, img: "./images/fiber/passion-fruit.png" },
+        ];
+
+        // Shuffle a copy of the deck each round
+        function shuffled(arr) {
+            const a = [...arr];
+            for (let i = a.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [a[i], a[j]] = [a[j], a[i]];
+            }
+            return a;
+        }
+
+        let fiberDeck = [];
+        let fiberIndex = 0;
+        let fiberScore = 0;
+
+        const fiberCardImg      = document.getElementById('fiber-card-img');
+        const fiberCardName     = document.getElementById('fiber-card-food-name');
+        const fiberCardServing  = document.getElementById('fiber-card-serving');
+        const fiberInput        = document.getElementById('fiber-input');
+        const fiberCheckBtn     = document.getElementById('fiber-check-btn');
+        const fiberResult       = document.getElementById('fiber-result');
+        const fiberNextBtn      = document.getElementById('fiber-next-btn');
+        const fiberProgress     = document.getElementById('fiber-progress');
+        const fiberScoreVal     = document.getElementById('fiber-score-val');
+        const fiberFlashcard    = document.getElementById('fiber-flashcard');
+        const fiberComplete     = document.getElementById('fiber-complete');
+        const fiberFinalScore   = document.getElementById('fiber-final-score');
+        const fiberRestartBtn   = document.getElementById('fiber-restart-btn');
+
+        function startFiberGame() {
+            fiberDeck = shuffled(fiberFoods);
+            fiberIndex = 0;
+            fiberScore = 0;
+            fiberScoreVal.textContent = 0;
+            fiberComplete.hidden = true;
+            fiberFlashcard.hidden = false;
+            showFiberCard();
+        }
+
+        function showFiberCard() {
+            const item = fiberDeck[fiberIndex];
+            fiberCardImg.innerHTML = '<span>image coming soon</span>';
+            fiberCardName.textContent = item.name;
+            fiberCardServing.textContent = item.serving;
+            fiberProgress.textContent = `Card ${fiberIndex + 1} of ${fiberDeck.length}`;
+            fiberInput.value = '';
+            fiberInput.disabled = false;
+            fiberResult.hidden = true;
+            fiberResult.className = '';
+            fiberNextBtn.hidden = true;
+            fiberCheckBtn.hidden = false;
+            fiberInput.focus();
+        }
+
+        function checkFiberGuess() {
+            const guess = parseFloat(fiberInput.value);
+            if (isNaN(guess)) return;
+
+            const item = fiberDeck[fiberIndex];
+            const diff = Math.abs(guess - item.fiber);
+            fiberInput.disabled = true;
+            fiberCheckBtn.hidden = true;
+            fiberResult.hidden = false;
+
+            if (diff <= 0.5) {
+                fiberResult.className = 'correct';
+                fiberResult.textContent = `Spot on! ${item.fiber}g`;
+                fiberScore++;
+                fiberScoreVal.textContent = fiberScore;
+            } else if (diff <= 2) {
+                fiberResult.className = 'close';
+                fiberResult.textContent = `So close! It's ${item.fiber}g`;
+            } else {
+                fiberResult.className = 'incorrect';
+                fiberResult.textContent = `Not quite — it's ${item.fiber}g`;
+            }
+
+            if (fiberIndex < fiberDeck.length - 1) {
+                fiberNextBtn.hidden = false;
+            } else {
+                fiberFinalScore.textContent = fiberScore;
+                setTimeout(() => {
+                    fiberFlashcard.hidden = true;
+                    fiberComplete.hidden = false;
+                }, 1200);
+            }
+        }
+
+        fiberCheckBtn.addEventListener('click', checkFiberGuess);
+        fiberInput.addEventListener('keydown', event => {
+            if (event.key === 'Enter') checkFiberGuess();
+        });
+        fiberNextBtn.addEventListener('click', () => {
+            fiberIndex++;
+            showFiberCard();
+        });
+        fiberRestartBtn.addEventListener('click', startFiberGame);
+
+        startFiberGame();
     </script>
 </body>
 </html>
