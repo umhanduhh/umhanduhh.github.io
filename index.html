@@ -253,7 +253,7 @@
 
             const dx = event.clientX - rect.left - radius;
             const dy = event.clientY - rect.top - radius;
-            if (Math.sqrt(dx * dx + dy * dy) + imgHalf > radius) return;
+            if (Math.sqrt(dx * dx + dy * dy) > radius) return;
 
             const x = event.clientX - rect.left - imgHalf;
             const y = event.clientY - rect.top - imgHalf;
