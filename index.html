@@ -103,6 +103,10 @@
             line-height: 1.2;
             word-break: break-word;
         }
+        .food-item.disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
         .on-plate {
             position: absolute;
             cursor: pointer;
@@ -369,45 +373,34 @@
             foodItemsContainer.appendChild(foodDiv);
         });
 
-        foodItemsContainer.addEventListener('dragstart', event => {
-            const foodDiv = event.target.closest('.food-item');
-            if (foodDiv) {
-                event.dataTransfer.setData('text/plain', foodDiv.dataset.index);
+        function updateProteinDisplay() {
+            totalProteinEl.textContent = totalProtein;
+            if (totalProtein >= 30) {
+                successBanner.hidden = false;
+                successBanner.textContent = `Goal reached! You're at ${totalProtein}g of protein.`;
+            } else {
+                successBanner.hidden = true;
             }
-        });
+        }
 
-        plate.addEventListener('dragover', event => {
-            event.preventDefault();
-        });
-
-        plate.addEventListener('dragenter', () => {
-            plate.classList.add('drag-over');
-        });
-
-        plate.addEventListener('dragleave', event => {
-            if (!plate.contains(event.relatedTarget)) {
-                plate.classList.remove('drag-over');
-            }
-        });
-
-        plate.addEventListener('drop', event => {
-            event.preventDefault();
-            plate.classList.remove('drag-over');
-
-            const index = parseInt(event.dataTransfer.getData('text/plain'), 10);
-            if (isNaN(index)) return;
+        function dropFoodOnPlate(index, clientX, clientY) {
             const item = foodItems[index];
-
             const rect = plate.getBoundingClientRect();
             const radius = rect.width / 2;
             const imgHalf = 35;
 
-            const dx = event.clientX - rect.left - radius;
-            const dy = event.clientY - rect.top - radius;
+            const dx = clientX - rect.left - radius;
+            const dy = clientY - rect.top - radius;
             if (Math.sqrt(dx * dx + dy * dy) > radius) return;
 
-            const x = event.clientX - rect.left - imgHalf;
-            const y = event.clientY - rect.top - imgHalf;
+            const sourceDiv = foodItemsContainer.querySelector(`.food-item[data-index="${index}"]`);
+            if (sourceDiv) {
+                sourceDiv.classList.add('disabled');
+                sourceDiv.draggable = false;
+            }
+
+            const x = clientX - rect.left - imgHalf;
+            const y = clientY - rect.top - imgHalf;
 
             const foodDiv = document.createElement('div');
             foodDiv.classList.add('on-plate');
@@ -422,25 +415,86 @@
 
             foodDiv.addEventListener('click', () => {
                 totalProtein = Math.max(0, totalProtein - item.protein);
-                totalProteinEl.textContent = totalProtein;
                 foodDiv.remove();
-                if (totalProtein < 30) successBanner.hidden = true;
+                if (sourceDiv) {
+                    sourceDiv.classList.remove('disabled');
+                    sourceDiv.draggable = true;
+                }
+                updateProteinDisplay();
             });
 
             plate.appendChild(foodDiv);
             totalProtein += item.protein;
-            totalProteinEl.textContent = totalProtein;
+            updateProteinDisplay();
+        }
 
-            if (totalProtein >= 30) {
-                successBanner.hidden = false;
+        foodItemsContainer.addEventListener('dragstart', event => {
+            const foodDiv = event.target.closest('.food-item');
+            if (foodDiv && !foodDiv.classList.contains('disabled')) {
+                event.dataTransfer.setData('text/plain', foodDiv.dataset.index);
             }
+        });
+
+        plate.addEventListener('dragover', event => { event.preventDefault(); });
+        plate.addEventListener('dragenter', () => { plate.classList.add('drag-over'); });
+        plate.addEventListener('dragleave', event => {
+            if (!plate.contains(event.relatedTarget)) plate.classList.remove('drag-over');
+        });
+
+        plate.addEventListener('drop', event => {
+            event.preventDefault();
+            plate.classList.remove('drag-over');
+            const index = parseInt(event.dataTransfer.getData('text/plain'), 10);
+            if (isNaN(index)) return;
+            dropFoodOnPlate(index, event.clientX, event.clientY);
         });
 
         resetBtn.addEventListener('click', () => {
             totalProtein = 0;
-            totalProteinEl.textContent = 0;
             plate.innerHTML = '';
-            successBanner.hidden = true;
+            foodItemsContainer.querySelectorAll('.food-item.disabled').forEach(div => {
+                div.classList.remove('disabled');
+                div.draggable = true;
+            });
+            updateProteinDisplay();
+        });
+
+        // Touch support
+        let touchDragIndex = null;
+        let touchClone = null;
+
+        foodItemsContainer.addEventListener('touchstart', event => {
+            const foodDiv = event.target.closest('.food-item');
+            if (!foodDiv || foodDiv.classList.contains('disabled')) return;
+            touchDragIndex = parseInt(foodDiv.dataset.index, 10);
+            const touch = event.touches[0];
+            touchClone = document.createElement('img');
+            touchClone.src = foodItems[touchDragIndex].img;
+            touchClone.style.cssText = `position:fixed;width:70px;height:70px;pointer-events:none;opacity:0.85;z-index:1000;border-radius:3px;left:${touch.clientX - 35}px;top:${touch.clientY - 35}px;`;
+            document.body.appendChild(touchClone);
+            event.preventDefault();
+        }, { passive: false });
+
+        document.addEventListener('touchmove', event => {
+            if (!touchClone) return;
+            const touch = event.touches[0];
+            touchClone.style.left = `${touch.clientX - 35}px`;
+            touchClone.style.top = `${touch.clientY - 35}px`;
+            event.preventDefault();
+        }, { passive: false });
+
+        document.addEventListener('touchend', event => {
+            if (touchClone) { touchClone.remove(); touchClone = null; }
+            if (touchDragIndex === null) return;
+            const touch = event.changedTouches[0];
+            const rect = plate.getBoundingClientRect();
+            const radius = rect.width / 2;
+            const dx = touch.clientX - rect.left - radius;
+            const dy = touch.clientY - rect.top - radius;
+            if (Math.sqrt(dx * dx + dy * dy) <= radius) {
+                dropFoodOnPlate(touchDragIndex, touch.clientX, touch.clientY);
+            }
+            touchDragIndex = null;
         });
 
         // ── Fiber Game ──
