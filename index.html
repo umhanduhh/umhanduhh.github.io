@@ -10,7 +10,7 @@
             margin: 0;
             padding: 0;
             background-color: #0f4c81;
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
         }
@@ -21,26 +21,110 @@
             text-align: center;
             flex-shrink: 0;
         }
-        nav {
-            display: flex;
-            justify-content: center;
-            background-color: #a5b2b5;
-            flex-shrink: 0;}
-        nav a {
-            color: white;
-            padding: 14px 20px;
-            text-decoration: none;
-            text-align: center;
-        }
-        nav a:hover {
-            background-color: #BFD0CA;
-            color: #e9b666;
-        }
         main {
             padding: 20px;
             color: #BFD0CA;
             flex-grow: 1;
-            overflow-y: auto;
+        }
+        h2 {
+            margin-top: 0;
+        }
+        #game-area {
+            display: flex;
+            flex-direction: row;
+            gap: 30px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+            align-items: flex-start;
+        }
+        #plate-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+        #plate {
+            border: 3px solid #a5b2b5;
+            background-color: #a5b2b5;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            position: relative;
+            transition: border-color 0.15s, background-color 0.15s;
+        }
+        #plate.drag-over {
+            border-color: #e9b666;
+            background-color: #b8c6c0;
+        }
+        #protein-counter {
+            color: #BFD0CA;
+            text-align: center;
+            font-size: 22px;
+        }
+        #reset-btn {
+            background-color: #a5b2b5;
+            color: white;
+            border: none;
+            padding: 8px 24px;
+            font-size: 16px;
+            font-family: "GillSans", sans-serif;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        #reset-btn:hover {
+            background-color: #BFD0CA;
+            color: #0f4c81;
+        }
+        #food-items {
+            display: flex;
+            flex-wrap: wrap;
+            flex: 1;
+            min-width: 200px;
+            align-content: flex-start;
+        }
+        .food-item {
+            margin: 8px;
+            width: 75px;
+            cursor: grab;
+            user-select: none;
+        }
+        .food-item img {
+            width: 75px;
+            height: 75px;
+            border: 2px solid #0f4c81;
+            display: block;
+        }
+        .food-item-name {
+            color: #BFD0CA;
+            font-size: 10px;
+            text-align: center;
+            margin-top: 3px;
+            line-height: 1.2;
+            word-break: break-word;
+        }
+        .on-plate {
+            position: absolute;
+            cursor: pointer;
+        }
+        .on-plate img {
+            width: 70px;
+            height: 70px;
+            display: block;
+            border-radius: 3px;
+            transition: opacity 0.15s;
+        }
+        .on-plate:hover img {
+            opacity: 0.5;
+        }
+        #success-banner {
+            background-color: #e9b666;
+            color: #0f4c81;
+            text-align: center;
+            padding: 14px 20px;
+            font-size: 20px;
+            border-radius: 6px;
+            margin-top: 24px;
         }
         footer {
             background-color: #edcabe;
@@ -55,20 +139,158 @@
     <header>
         <h1>Amateur Chefs Arcade</h1>
     </header>
-    <nav>
-        <a href="./index.html">Home</a>
-        <a href="./about.html">About</a>
-        <a href="./games.html">Games</a>
-        <a href="./recipes.html">Recipes</a>
-        <a href="./blog.html">Blog</a>
-    </nav>
     <main>
-        <h2 id="home">Welcome</h2>
-        <p>Welcome!&nbsp;We're glad to have you. <br> Amateur Chefs Arcade is a passion project combining its creator's love for cooking and nutrition, and curiosity about coding.<br> <br> Here you'll find recipes, games, and blogs to help you have more fun eating foods that bring you joy and energy. <br>You won't find any weight loss tips, shame, or prescriptive rules to follow. 
-        <br><br> We're not registered dietitians, and believe that registered dietitians are the best people to give dietary advice and guidance to individuals. <br> We do love food and fueling our bodies, and want to share that love here. <br> If you'd like to connect with a registered dietitian, let us know, we'd love to introduce you to some great ones! <br> <br>Thanks to chatGPT and my husband for all the help building this, and thanks to you for being here!</p>
+        <h2>Start Your Day Strong</h2>
+        <p>It's often recommended that adults have .36 grams of protein per pound of their body weight. The amount of protein a person needs can vary, and you should work with a registered dietitian if you want to learn more about your specific protein needs. Most people can benefit from having a breakfast that's high in protein. Can you drag and drop foods to the plate to build a breakfast of 30g of protein or more?</p>
+        <div id="game-area">
+            <div id="plate-container">
+                <div id="plate"></div>
+                <div id="protein-counter">
+                    Total Protein: <span id="total-protein">0</span>g / 30g
+                </div>
+                <button id="reset-btn">Reset</button>
+            </div>
+            <div id="food-items"></div>
+        </div>
+        <div id="success-banner" hidden>Congratulations! You reached 30g of protein!</div>
     </main>
     <footer>
         <p>&copy; 2024 Amateur Chefs Arcade</p>
     </footer>
+    <script>
+        const foodItems = [
+            { name: "Avocado", protein: 3, img: "./images/avocado.png" },
+            { name: "Eggs", protein: 18, img: "./images/eggs.png" },
+            { name: "Almonds", protein: 6, img: "./images/almonds.png" },
+            { name: "Bacon", protein: 9, img: "./images/bacon.png" },
+            { name: "Bagel", protein: 9, img: "./images/bagel.png" },
+            { name: "Banana", protein: 1, img: "./images/banana.png" },
+            { name: "Biscuits and Gravy", protein: 7, img: "./images/biscuits and gravy.png" },
+            { name: "Sausage Links", protein: 15, img: "./images/sausages.png" },
+            { name: "Cereal", protein: 4, img: "./images/cereal.png" },
+            { name: "Cinnamon Rolls", protein: 3, img: "./images/cinnamon roll.png" },
+            { name: "Cottage Cheese", protein: 25, img: "./images/cottage cheese.png" },
+            { name: "Croissant", protein: 5, img: "./images/croissant.png" },
+            { name: "Donut", protein: 2, img: "./images/donut.png" },
+            { name: "English Muffin", protein: 5, img: "./images/english muffin.png" },
+            { name: "French Toast", protein: 8, img: "./images/french toast.png" },
+            { name: "Fruit Smoothie", protein: 3, img: "./images/fruit smoothie.png" },
+            { name: "Granola", protein: 5, img: "./images/granola.png" },
+            { name: "Greek Yogurt", protein: 10, img: "./images/greek yogurt.png" },
+            { name: "Hashbrowns", protein: 2, img: "./images/hashbrowns.png" },
+            { name: "Mixed Fruit", protein: 1, img: "./images/fruit.png" },
+            { name: "Muffins", protein: 3, img: "./images/muffin.png" },
+            { name: "Oatmeal", protein: 6, img: "./images/oatmeal.png" },
+            { name: "Pancakes", protein: 6, img: "./images/pancakes.png" },
+            { name: "Peanut Butter", protein: 8, img: "./images/peanut buter.png" },
+            { name: "Protein Shake", protein: 20, img: "./images/protein shake.png" },
+            { name: "Quiche", protein: 15, img: "./images/quiche.png" },
+            { name: "Scones", protein: 3, img: "./images/scones.png" },
+            { name: "Waffles", protein: 5, img: "./images/waffle.png" },
+            { name: "Whole Wheat Toast", protein: 6, img: "./images/toast.png" },
+            { name: "Breakfast Sandwich", protein: 12, img: "./images/breakfast sandwich.png" },
+        ];
+
+        const foodItemsContainer = document.getElementById('food-items');
+        const plate = document.getElementById('plate');
+        const totalProteinEl = document.getElementById('total-protein');
+        const successBanner = document.getElementById('success-banner');
+        const resetBtn = document.getElementById('reset-btn');
+        let totalProtein = 0;
+
+        foodItems.forEach((item, i) => {
+            const foodDiv = document.createElement('div');
+            foodDiv.classList.add('food-item');
+            foodDiv.draggable = true;
+            foodDiv.dataset.index = i;
+
+            const img = document.createElement('img');
+            img.src = item.img;
+            img.alt = item.name;
+            img.draggable = false;
+
+            const label = document.createElement('div');
+            label.classList.add('food-item-name');
+            label.textContent = item.name;
+
+            foodDiv.appendChild(img);
+            foodDiv.appendChild(label);
+            foodItemsContainer.appendChild(foodDiv);
+        });
+
+        foodItemsContainer.addEventListener('dragstart', event => {
+            const foodDiv = event.target.closest('.food-item');
+            if (foodDiv) {
+                event.dataTransfer.setData('text/plain', foodDiv.dataset.index);
+            }
+        });
+
+        plate.addEventListener('dragover', event => {
+            event.preventDefault();
+        });
+
+        plate.addEventListener('dragenter', () => {
+            plate.classList.add('drag-over');
+        });
+
+        plate.addEventListener('dragleave', event => {
+            if (!plate.contains(event.relatedTarget)) {
+                plate.classList.remove('drag-over');
+            }
+        });
+
+        plate.addEventListener('drop', event => {
+            event.preventDefault();
+            plate.classList.remove('drag-over');
+
+            const index = parseInt(event.dataTransfer.getData('text/plain'), 10);
+            if (isNaN(index)) return;
+            const item = foodItems[index];
+
+            const rect = plate.getBoundingClientRect();
+            const radius = rect.width / 2;
+            const imgHalf = 35;
+
+            const dx = event.clientX - rect.left - radius;
+            const dy = event.clientY - rect.top - radius;
+            if (Math.sqrt(dx * dx + dy * dy) + imgHalf > radius) return;
+
+            const x = event.clientX - rect.left - imgHalf;
+            const y = event.clientY - rect.top - imgHalf;
+
+            const foodDiv = document.createElement('div');
+            foodDiv.classList.add('on-plate');
+            foodDiv.title = `${item.name} — click to remove`;
+            foodDiv.style.left = `${x}px`;
+            foodDiv.style.top = `${y}px`;
+
+            const img = document.createElement('img');
+            img.src = item.img;
+            img.alt = item.name;
+            foodDiv.appendChild(img);
+
+            foodDiv.addEventListener('click', () => {
+                totalProtein = Math.max(0, totalProtein - item.protein);
+                totalProteinEl.textContent = totalProtein;
+                foodDiv.remove();
+                if (totalProtein < 30) successBanner.hidden = true;
+            });
+
+            plate.appendChild(foodDiv);
+            totalProtein += item.protein;
+            totalProteinEl.textContent = totalProtein;
+
+            if (totalProtein >= 30) {
+                successBanner.hidden = false;
+            }
+        });
+
+        resetBtn.addEventListener('click', () => {
+            totalProtein = 0;
+            totalProteinEl.textContent = 0;
+            plate.innerHTML = '';
+            successBanner.hidden = true;
+        });
+    </script>
 </body>
 </html>
