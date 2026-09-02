@@ -29,6 +29,29 @@
         h2 {
             margin-top: 0;
         }
+        #game-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        .tab-btn {
+            background-color: #a5b2b5;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-family: "GillSans", sans-serif;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .tab-btn:hover {
+            background-color: #BFD0CA;
+            color: #0f4c81;
+        }
+        .tab-btn.active {
+            background-color: #e9b666;
+            color: #0f4c81;
+        }
         #game-area {
             display: flex;
             flex-direction: row;
@@ -47,15 +70,18 @@
         #plate {
             border: 3px solid #a5b2b5;
             background-color: #a5b2b5;
-            width: 300px;
-            height: 300px;
+            width: min(300px, 80vw);
+            height: min(300px, 80vw);
             border-radius: 50%;
             position: relative;
             transition: border-color 0.15s, background-color 0.15s;
-        }
-        #plate.drag-over {
-            border-color: #e9b666;
-            background-color: #b8c6c0;
+            display: flex;
+            flex-wrap: wrap;
+            align-content: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 12px;
+            box-sizing: border-box;
         }
         #protein-counter {
             color: #BFD0CA;
@@ -86,8 +112,12 @@
         .food-item {
             margin: 8px;
             width: 75px;
-            cursor: grab;
+            cursor: pointer;
             user-select: none;
+            transition: transform 0.1s;
+        }
+        .food-item:active {
+            transform: scale(0.95);
         }
         .food-item img {
             width: 75px;
@@ -103,17 +133,12 @@
             line-height: 1.2;
             word-break: break-word;
         }
-        .food-item.disabled {
-            opacity: 0.3;
-            cursor: not-allowed;
-        }
         .on-plate {
-            position: absolute;
             cursor: pointer;
         }
         .on-plate img {
-            width: 70px;
-            height: 70px;
+            width: 50px;
+            height: 50px;
             display: block;
             border-radius: 3px;
             transition: opacity 0.15s;
@@ -139,12 +164,7 @@
         }
 
         /* ── Fiber Game ── */
-        #fiber-game {
-            margin-top: 60px;
-            padding-top: 40px;
-            border-top: 2px solid #a5b2b5;
-        }
-        #fiber-game h2 {
+        #fiber-panel h2 {
             margin-top: 0;
         }
         #fiber-flashcard {
@@ -158,7 +178,8 @@
             color: #0f4c81;
             border-radius: 12px;
             padding: 32px 28px;
-            width: 300px;
+            width: min(300px, 90vw);
+            box-sizing: border-box;
             text-align: center;
             box-shadow: 0 4px 16px rgba(0,0,0,0.25);
         }
@@ -263,6 +284,30 @@
         #fiber-restart-btn {
             margin-top: 16px;
         }
+
+        @media (max-width: 600px) {
+            main {
+                padding: 12px;
+            }
+            .tab-btn {
+                flex: 1;
+                padding: 10px 8px;
+            }
+            #game-area {
+                gap: 16px;
+            }
+            .food-item {
+                width: 60px;
+                margin: 6px;
+            }
+            .food-item img {
+                width: 60px;
+                height: 60px;
+            }
+            #fiber-card {
+                padding: 24px 18px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -270,21 +315,28 @@
         <h1>Amateur Chefs Arcade</h1>
     </header>
     <main>
-        <h2>Start Your Day Strong</h2>
-        <p>It's often recommended that adults have .36 grams of protein per pound of their body weight. The amount of protein a person needs can vary, and you should work with a registered dietitian if you want to learn more about your specific protein needs. Most people can benefit from having a breakfast that's high in protein. Can you drag and drop foods to the plate to build a breakfast of 30g of protein or more?</p>
-        <div id="game-area">
-            <div id="plate-container">
-                <div id="plate"></div>
-                <div id="protein-counter">
-                    Total Protein: <span id="total-protein">0</span>g / 30g
-                </div>
-                <button id="reset-btn">Reset</button>
-            </div>
-            <div id="food-items"></div>
+        <div id="game-tabs">
+            <button class="tab-btn active" data-tab="protein">Protein Plate</button>
+            <button class="tab-btn" data-tab="fiber">Fiber Finder</button>
         </div>
-        <div id="success-banner" hidden>Congratulations! You reached 30g of protein!</div>
 
-        <section id="fiber-game">
+        <section id="protein-panel" class="game-panel">
+            <h2>Start Your Day Strong</h2>
+            <p>It's often recommended that adults have .36 grams of protein per pound of their body weight. The amount of protein a person needs can vary, and you should work with a registered dietitian if you want to learn more about your specific protein needs. Most people can benefit from having a breakfast that's high in protein. Can you tap foods to add them to the plate and build a breakfast of 30g of protein or more?</p>
+            <div id="game-area">
+                <div id="plate-container">
+                    <div id="plate"></div>
+                    <div id="protein-counter">
+                        Total Protein: <span id="total-protein">0</span>g / 30g
+                    </div>
+                    <button id="reset-btn">Reset</button>
+                </div>
+                <div id="food-items"></div>
+            </div>
+            <div id="success-banner" hidden>Congratulations! You reached 30g of protein!</div>
+        </section>
+
+        <section id="fiber-panel" class="game-panel" hidden>
             <h2>Fiber Finder</h2>
             <p>How well do you know your fiber? Guess how many grams of fiber are in each food, then check your answer.</p>
             <div id="fiber-flashcard">
@@ -313,6 +365,15 @@
         <p>&copy; 2024 Amateur Chefs Arcade</p>
     </footer>
     <script>
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.game-panel').forEach(p => p.hidden = true);
+                btn.classList.add('active');
+                document.getElementById(`${btn.dataset.tab}-panel`).hidden = false;
+            });
+        });
+
         const foodItems = [
             { name: "Avocado", protein: 3, img: "./images/avocado.png" },
             { name: "Eggs", protein: 18, img: "./images/eggs.png" },
@@ -356,13 +417,11 @@
         foodItems.forEach((item, i) => {
             const foodDiv = document.createElement('div');
             foodDiv.classList.add('food-item');
-            foodDiv.draggable = true;
             foodDiv.dataset.index = i;
 
             const img = document.createElement('img');
             img.src = item.img;
             img.alt = item.name;
-            img.draggable = false;
 
             const label = document.createElement('div');
             label.classList.add('food-item-name');
@@ -383,30 +442,12 @@
             }
         }
 
-        function dropFoodOnPlate(index, clientX, clientY) {
+        function addFoodToPlate(index) {
             const item = foodItems[index];
-            const rect = plate.getBoundingClientRect();
-            const radius = rect.width / 2;
-            const imgHalf = 35;
-
-            const dx = clientX - rect.left - radius;
-            const dy = clientY - rect.top - radius;
-            if (Math.sqrt(dx * dx + dy * dy) > radius) return;
-
-            const sourceDiv = foodItemsContainer.querySelector(`.food-item[data-index="${index}"]`);
-            if (sourceDiv) {
-                sourceDiv.classList.add('disabled');
-                sourceDiv.draggable = false;
-            }
-
-            const x = clientX - rect.left - imgHalf;
-            const y = clientY - rect.top - imgHalf;
 
             const foodDiv = document.createElement('div');
             foodDiv.classList.add('on-plate');
             foodDiv.title = `${item.name} — click to remove`;
-            foodDiv.style.left = `${x}px`;
-            foodDiv.style.top = `${y}px`;
 
             const img = document.createElement('img');
             img.src = item.img;
@@ -416,10 +457,6 @@
             foodDiv.addEventListener('click', () => {
                 totalProtein = Math.max(0, totalProtein - item.protein);
                 foodDiv.remove();
-                if (sourceDiv) {
-                    sourceDiv.classList.remove('disabled');
-                    sourceDiv.draggable = true;
-                }
                 updateProteinDisplay();
             });
 
@@ -428,73 +465,15 @@
             updateProteinDisplay();
         }
 
-        foodItemsContainer.addEventListener('dragstart', event => {
+        foodItemsContainer.addEventListener('click', event => {
             const foodDiv = event.target.closest('.food-item');
-            if (foodDiv && !foodDiv.classList.contains('disabled')) {
-                event.dataTransfer.setData('text/plain', foodDiv.dataset.index);
-            }
-        });
-
-        plate.addEventListener('dragover', event => { event.preventDefault(); });
-        plate.addEventListener('dragenter', () => { plate.classList.add('drag-over'); });
-        plate.addEventListener('dragleave', event => {
-            if (!plate.contains(event.relatedTarget)) plate.classList.remove('drag-over');
-        });
-
-        plate.addEventListener('drop', event => {
-            event.preventDefault();
-            plate.classList.remove('drag-over');
-            const index = parseInt(event.dataTransfer.getData('text/plain'), 10);
-            if (isNaN(index)) return;
-            dropFoodOnPlate(index, event.clientX, event.clientY);
+            if (foodDiv) addFoodToPlate(parseInt(foodDiv.dataset.index, 10));
         });
 
         resetBtn.addEventListener('click', () => {
             totalProtein = 0;
             plate.innerHTML = '';
-            foodItemsContainer.querySelectorAll('.food-item.disabled').forEach(div => {
-                div.classList.remove('disabled');
-                div.draggable = true;
-            });
             updateProteinDisplay();
-        });
-
-        // Touch support
-        let touchDragIndex = null;
-        let touchClone = null;
-
-        foodItemsContainer.addEventListener('touchstart', event => {
-            const foodDiv = event.target.closest('.food-item');
-            if (!foodDiv || foodDiv.classList.contains('disabled')) return;
-            touchDragIndex = parseInt(foodDiv.dataset.index, 10);
-            const touch = event.touches[0];
-            touchClone = document.createElement('img');
-            touchClone.src = foodItems[touchDragIndex].img;
-            touchClone.style.cssText = `position:fixed;width:70px;height:70px;pointer-events:none;opacity:0.85;z-index:1000;border-radius:3px;left:${touch.clientX - 35}px;top:${touch.clientY - 35}px;`;
-            document.body.appendChild(touchClone);
-            event.preventDefault();
-        }, { passive: false });
-
-        document.addEventListener('touchmove', event => {
-            if (!touchClone) return;
-            const touch = event.touches[0];
-            touchClone.style.left = `${touch.clientX - 35}px`;
-            touchClone.style.top = `${touch.clientY - 35}px`;
-            event.preventDefault();
-        }, { passive: false });
-
-        document.addEventListener('touchend', event => {
-            if (touchClone) { touchClone.remove(); touchClone = null; }
-            if (touchDragIndex === null) return;
-            const touch = event.changedTouches[0];
-            const rect = plate.getBoundingClientRect();
-            const radius = rect.width / 2;
-            const dx = touch.clientX - rect.left - radius;
-            const dy = touch.clientY - rect.top - radius;
-            if (Math.sqrt(dx * dx + dy * dy) <= radius) {
-                dropFoodOnPlate(touchDragIndex, touch.clientX, touch.clientY);
-            }
-            touchDragIndex = null;
         });
 
         // ── Fiber Game ──
@@ -571,7 +550,12 @@
 
         function showFiberCard() {
             const item = fiberDeck[fiberIndex];
-            fiberCardImg.innerHTML = '<span>image coming soon</span>';
+            fiberCardImg.innerHTML = '';
+            const img = document.createElement('img');
+            img.src = item.img;
+            img.alt = item.name;
+            img.onerror = () => { fiberCardImg.innerHTML = '<span>image coming soon</span>'; };
+            fiberCardImg.appendChild(img);
             fiberCardName.textContent = item.name;
             fiberCardServing.textContent = item.serving;
             fiberProgress.textContent = `Card ${fiberIndex + 1} of ${fiberDeck.length}`;
